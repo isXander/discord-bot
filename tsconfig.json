@@ -13,9 +13,8 @@
 		"noEmit": true,
 		"lib": ["esnext", "dom"],
 		"allowSyntheticDefaultImports": true,
-		"baseUrl": ".",
 		"paths": {
-			"@/*": ["src/*"]
+			"@/*": ["./src/*"]
 		}
 	},
 	"include": ["src"]
