@@ -1,12 +1,12 @@
+import { ThreadChannel } from 'discord.js'
 import { eq, sql } from 'drizzle-orm'
 
 import { ACTIVE_ROLE_GRANTED_EMBED } from '@/data'
 import { db } from '@/db'
 import { users } from '@/db/schema'
+import { info } from '@/logging/logger'
 import { CreateListener } from '@/types'
 import { createDefaultEmbed } from '@/utils'
-import { info } from '@/logging/logger'
-import { ThreadChannel } from 'discord.js'
 
 export const countMessages: CreateListener = {
 	id: 'global:count-messages',

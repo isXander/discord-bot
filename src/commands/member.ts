@@ -3,10 +3,10 @@ import * as process from 'node:process'
 import { ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js'
 import { eq } from 'drizzle-orm'
 
+import { PERMISSION_ERROR_TEXT } from '@/data'
 import { db } from '@/db'
 import { users } from '@/db/schema'
 import { ChatInputCommand } from '@/types'
-import { PERMISSION_ERROR_TEXT } from '@/data'
 
 export const memberCommand: ChatInputCommand = {
 	data: new SlashCommandBuilder()

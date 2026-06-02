@@ -1,13 +1,15 @@
-import { ChatInputCommand } from '@/types'
+import process from 'node:process'
+
 import {
 	ChatInputCommandInteraction,
 	GuildMemberRoleManager,
 	PermissionFlagsBits,
 	SlashCommandBuilder,
 } from 'discord.js'
-import process from 'node:process'
+
 import { PERMISSION_ERROR_TEXT } from '@/data'
 import { info } from '@/logging/logger'
+import { ChatInputCommand } from '@/types'
 import { createDefaultEmbed } from '@/utils'
 
 export const pmCommand: ChatInputCommand = {

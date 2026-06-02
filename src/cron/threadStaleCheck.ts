@@ -1,5 +1,6 @@
-import type { Client } from 'discord.js'
 import { CronJob } from 'cron'
+import type { Client } from 'discord.js'
+
 import { createDefaultEmbed } from '@/utils'
 
 export function startThreadStaleCheckCron(client: Client) {

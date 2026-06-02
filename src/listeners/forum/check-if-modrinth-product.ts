@@ -1,9 +1,8 @@
 import { ThreadChannel } from 'discord.js'
 
 import { MODRINTH_PROUDCT_EMBED } from '@/data'
-import { createDefaultEmbed, isInCommunitySupportThread, isThreadStarterMessage } from '@/utils'
-
 import { CreateListener } from '@/types'
+import { createDefaultEmbed, isInCommunitySupportThread, isThreadStarterMessage } from '@/utils'
 
 const modrinthProductKeywords = [
 	/\b(modrinth app|theseus_gui)\b/i,

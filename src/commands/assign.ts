@@ -1,15 +1,17 @@
-import { ChatInputCommand } from '@/types'
+import process from 'node:process'
+
 import {
 	ChatInputCommandInteraction,
 	EmbedBuilder,
 	PermissionFlagsBits,
 	SlashCommandBuilder,
 } from 'discord.js'
-import process from 'node:process'
+import { eq } from 'drizzle-orm'
+
 import { PERMISSION_ERROR_TEXT } from '@/data'
 import { db } from '@/db'
 import { applications } from '@/db/schema'
-import { eq } from 'drizzle-orm'
+import { ChatInputCommand } from '@/types'
 
 export const assignCommand: ChatInputCommand = {
 	data: new SlashCommandBuilder()

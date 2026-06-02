@@ -1,5 +1,5 @@
-import { Client, IncidentActionsEditOptions } from 'discord.js'
 import { CronJob } from 'cron'
+import { Client, IncidentActionsEditOptions } from 'discord.js'
 
 export function startServerPauseDMs(client: Client) {
 	const debug = process.env.CRON_DEBUG_MODE === '1'

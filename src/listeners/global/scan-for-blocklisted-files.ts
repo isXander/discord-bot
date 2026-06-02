@@ -1,9 +1,10 @@
+import { createHash } from 'crypto'
+import { TextChannel } from 'discord.js'
+
 import { BLOCKLISTED_FILE_EXTENSIONS } from '@/data/misc'
+import { error } from '@/logging/logger'
 import { CreateListener } from '@/types'
 import { toHumanFileSize } from '@/utils'
-import { TextChannel } from 'discord.js'
-import { createHash } from 'crypto'
-import { error } from '@/logging/logger'
 
 type HashResult = {
 	sha512: string

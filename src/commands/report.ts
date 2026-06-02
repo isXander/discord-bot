@@ -1,8 +1,9 @@
-import { SlashCommandBuilder, GuildMemberRoleManager } from 'discord.js'
-
-import type { ChatInputCommand } from '@/types/commands'
 import process from 'node:process'
+
+import { GuildMemberRoleManager, SlashCommandBuilder } from 'discord.js'
+
 import { PERMISSION_ERROR_TEXT } from '@/data'
+import type { ChatInputCommand } from '@/types/commands'
 
 export const reportCommand: ChatInputCommand = {
 	data: new SlashCommandBuilder()

@@ -4,7 +4,7 @@ import type { Client } from 'discord.js'
 import { and, eq, gt, sql } from 'drizzle-orm'
 import express, { NextFunction, Request, Response } from 'express'
 
-import { CrowdinOauthHelper, ModrinthApi, ModrinthOauthHelper } from '@/api/'
+import { CrowdinOauthHelper, ModrinthOauthHelper } from '@/api/'
 import { db } from '@/db'
 import { crowdinAccounts, oauthVerifications, users } from '@/db/schema'
 import { createDefaultEmbed } from '@/utils/embeds'
@@ -16,7 +16,7 @@ const BASE_URL = process.env.PUBLIC_BASE_URL || 'http://localhost:3000'
 const GUILD_ID = process.env.GUILD_ID!
 const TRANSLATOR_ROLE_ID = process.env.TRANSLATOR_ROLE_ID || process.env.ACTIVE_ROLE_ID!
 const CROWDIN_SCOPES = 'project'
-const VERIFIED_CREATOR_ROLE_ID = process.env.VERIFIED_CREATOR_ROLE_ID || ''
+const PRIDE_ROLE_ID = process.env.PRIDE_ROLE_ID || ''
 const PROOFREADER_ROLE_ID = process.env.PROOFREADER_ROLE_ID || ''
 
 const inflightStates = new Map<string, number>()
@@ -94,21 +94,7 @@ export function startWebServer(client: Client) {
 				.values({ id: stateRow.discordUserId, modrinthUserId: String(user.id) })
 				.onConflictDoUpdate({ target: users.id, set: { modrinthUserId: String(user.id) } })
 
-			const projects = await ModrinthApi.getUserProjects(user.id)
-			const weights: Record<string, number> = {
-				mod: 1,
-				plugin: 3,
-				resourcepack: 1,
-				shader: 3,
-				modpack: 0.2,
-				datapack: 1,
-			}
-			const totalWeighted = projects.reduce((acc, p) => {
-				const w = (weights as any)[p.project_type] ?? 1
-				const d = p.downloads ?? 0
-				return acc + w * d
-			}, 0)
-			const threshold = Number(process.env.CREATOR_DOWNLOADS_THRESHOLD ?? 20000)
+			const hasPrideBadge = user.campaigns?.pride_26?.has_badge === true
 
 			if (!client.isReady()) {
 				await new Promise<void>((resolve) => client.once('ready', () => resolve()))
@@ -116,24 +102,37 @@ export function startWebServer(client: Client) {
 			const guild = await client.guilds.fetch(GUILD_ID)
 			const member = await guild.members.fetch(stateRow.discordUserId).catch(() => null)
 			if (member) {
-				let creatorGranted = false
-				if (totalWeighted >= threshold && VERIFIED_CREATOR_ROLE_ID) {
+				let prideGranted = false
+				const alreadyHasPrideRole = PRIDE_ROLE_ID ? member.roles.cache.has(PRIDE_ROLE_ID) : false
+				console.debug('[Modrinth][Verify]', {
+					userId: String(user.id),
+					discordUserId: stateRow.discordUserId,
+					hasPrideBadge,
+					prideRoleConfigured: Boolean(PRIDE_ROLE_ID),
+					alreadyHasPrideRole,
+				})
+
+				if (hasPrideBadge && PRIDE_ROLE_ID && !alreadyHasPrideRole) {
 					try {
-						await member.roles.add(VERIFIED_CREATOR_ROLE_ID)
-						creatorGranted = true
+						await member.roles.add(PRIDE_ROLE_ID)
+						prideGranted = true
 					} catch (err) {
-						console.error('[Discord][ERROR] Failed to grant creator role', err)
+						console.error('[Discord][ERROR] Failed to grant pride role', err)
 					}
+				} else if (hasPrideBadge && !PRIDE_ROLE_ID) {
+					console.warn('[Discord] PRIDE_ROLE_ID is not configured; cannot grant pride role')
 				}
 				try {
-					const fmt = (n: number) => Math.floor(n).toLocaleString()
+					let description = 'Your Modrinth account has been linked.'
+					if (prideGranted) {
+						description = 'Thanks for supporting Pride 2026! We granted you the Pride role.'
+					} else if (hasPrideBadge && alreadyHasPrideRole) {
+						description = 'Thanks for supporting Pride 2026! You already have the Pride role.'
+					}
+
 					const embed = createDefaultEmbed()
 						.setTitle('Modrinth account linked')
-						.setDescription(
-							creatorGranted
-								? 'You meet the requirements for the Creator role.'
-								: 'Your account has been linked, but you do not meet the current threshold yet. You will receive an email when you do.',
-						)
+						.setDescription(description)
 					await member.send({ embeds: [embed] })
 				} catch {
 					// ignore

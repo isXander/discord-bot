@@ -1,22 +1,21 @@
 import 'dotenv/config'
 
 import { Client, Events, GatewayIntentBits, Partials, TextChannel } from 'discord.js'
+import { eq } from 'drizzle-orm'
 
 import commands from '@/commands'
+import { startServerPauseDMs } from '@/cron/pauseDMs'
+import { startThreadStaleCheckCron } from '@/cron/threadStaleCheck'
 import listeners from '@/listeners'
 import reactionListeners from '@/listeners/reaction'
 import { createCommandRegistry, deployCommands, tryJoinThread } from '@/utils'
 
 import { db } from './db'
+import { watchlist } from './db/schema'
+import { createDiscordLogger } from './logging/discordLogger'
+import { setLogger } from './logging/logger'
 import { createMessageHandlers, createReactionHandlers } from './types/listeners'
 import { startWebServer } from './web'
-import { startThreadStaleCheckCron } from '@/cron/threadStaleCheck'
-
-import { setLogger } from './logging/logger'
-import { createDiscordLogger } from './logging/discordLogger'
-import { startServerPauseDMs } from '@/cron/pauseDMs'
-import { watchlist } from './db/schema'
-import { eq } from 'drizzle-orm'
 
 const DEBUG_COMMAND_IDS = process.argv.includes('--debug-command-ids')
 

@@ -1,5 +1,6 @@
 import type { Snowflake } from 'discord.js'
 import { eq, sql } from 'drizzle-orm'
+
 import { db } from '@/db'
 import { users } from '@/db/schema'
 import { info } from '@/logging/logger'

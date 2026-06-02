@@ -1,5 +1,6 @@
 // src/logging/discordLogger.ts
 import { Client, TextBasedChannel, ThreadChannel } from 'discord.js'
+
 import { Logger } from './logger'
 
 export async function createDiscordLogger(client: Client, channelId: string): Promise<Logger> {

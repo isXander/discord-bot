@@ -1,11 +1,11 @@
 import { ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js'
+import { eq } from 'drizzle-orm'
 
-import { ChatInputCommand } from '@/types'
 import { PERMISSION_ERROR_TEXT } from '@/data'
 import { db } from '@/db'
 import { watchlist } from '@/db/schema'
-import { eq } from 'drizzle-orm'
 import { info } from '@/logging/logger'
+import { ChatInputCommand } from '@/types'
 
 export const watchlistCommand: ChatInputCommand = {
 	data: new SlashCommandBuilder()

@@ -1,4 +1,5 @@
 import { GuildMember } from 'discord.js'
+
 import { getTrustScore } from './trust'
 
 const QUARANTINED_ROLE_ID = process.env.QUARANTINED_ROLE_ID!

@@ -18,4 +18,11 @@ export interface ModrinthUser {
 	id: string
 	username: string
 	name: string
+	campaigns?: {
+		pride_26?: {
+			last_donated_at?: string
+			has_badge?: boolean
+			has_midas?: boolean
+		}
+	}
 }

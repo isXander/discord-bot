@@ -1,4 +1,4 @@
-import { ModrinthProject } from '@/api/types'
+import type { ModrinthProject, ModrinthUser } from '@/api/types'
 
 export type ModrinthOAuthToken = {
 	access_token: string
@@ -51,12 +51,12 @@ export class ModrinthOauthHelper {
 		return (await res.json()) as ModrinthOAuthToken
 	}
 
-	async getCurrentUser(accessToken: string): Promise<{ id: string; username: string }> {
-		const res = await fetch('https://api.modrinth.com/v2/user', {
+	async getCurrentUser(accessToken: string): Promise<ModrinthUser> {
+		const res = await fetch('https://api.modrinth.com/v3/user', {
 			headers: { Authorization: `Bearer ${accessToken}` },
 		})
-		if (!res.ok) throw new Error(`Modrinth /user failed: ${res.status}`)
-		return (await res.json()) as any
+		if (!res.ok) throw new Error(`Modrinth v3 /user failed: ${res.status}`)
+		return (await res.json()) as ModrinthUser
 	}
 }
 
@@ -74,9 +74,5 @@ export class ModrinthApi {
 
 	static async getProject(id: string): Promise<ModrinthProject> {
 		return this.request<ModrinthProject>(`/project/${id}`)
-	}
-
-	static async getUserProjects(idOrUsername: string): Promise<ModrinthProject[]> {
-		return this.request<ModrinthProject[]>(`/user/${encodeURIComponent(idOrUsername)}/projects`)
 	}
 }

@@ -1,8 +1,8 @@
 import { GuildMember } from 'discord.js'
 
-import { CreateListener } from '@/types'
-import { isByActivatedUser, capitalizeFirstChar } from '@/utils'
 import { info } from '@/logging/logger'
+import { CreateListener } from '@/types'
+import { capitalizeFirstChar, isByActivatedUser } from '@/utils'
 
 export const enforceNamePolicy: CreateListener = {
 	id: 'global:enforce-name-policy',

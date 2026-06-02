@@ -48,20 +48,22 @@ export const verifyCommand: ChatInputCommand = {
 			return
 		}
 		if (sub === 'modrinth') {
-			// const token = await createVerificationState(interaction.user.id)
-			// const url = `${base}/modrinth/verify?token=${encodeURIComponent(token)}`
-			// await interaction.reply({
-			// 	content: `To link your Modrinth account, open: ${url}\nThis link expires in 15 minutes.`,
-			// 	ephemeral: true,
-			// })
+			const token = await createVerificationState(interaction.user.id)
+			const url = `${base}/modrinth/verify?token=${encodeURIComponent(token)}`
+			const expireAt = Math.floor(Date.now() / 1000) + 15 * 60 // now + 15 minutes
+
 			const embed = new EmbedBuilder()
 				.setColor(0x1bd96a)
 				.setTitle('Link your Modrinth account')
 				.setDescription(
 					[
-						'Modrinth account verification is coming soon!',
+						'We need to verify your Modrinth account to link it with your Discord.',
 						' ',
-						"We'll let you know when it's ready.",
+						'To continue, please click the link down below.',
+						' ',
+						`**[[ Click here to continue → ]](${url})**`,
+						' ',
+						`-# This link will expire <t:${expireAt}:R>`,
 					].join('\n'),
 				)
 

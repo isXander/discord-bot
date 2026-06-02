@@ -1,4 +1,5 @@
-import { ChatInputCommand } from '@/types'
+import process from 'node:process'
+
 import {
 	ChatInputCommandInteraction,
 	EmbedBuilder,
@@ -6,12 +7,13 @@ import {
 	SlashCommandBuilder,
 	TextChannel,
 } from 'discord.js'
-import process from 'node:process'
+import { and, desc, eq } from 'drizzle-orm'
+
 import { db } from '@/db'
 import { applications, users } from '@/db/schema'
-import { and, desc, eq } from 'drizzle-orm'
-import { createDefaultEmbed } from '@/utils'
 import { info } from '@/logging/logger'
+import { ChatInputCommand } from '@/types'
+import { createDefaultEmbed } from '@/utils'
 
 export const applyCommand: ChatInputCommand = {
 	data: new SlashCommandBuilder()

@@ -1,7 +1,8 @@
+import { EmbedBuilder, ThreadChannel } from 'discord.js'
+
+import { error } from '@/logging/logger'
 import { CreateListener } from '@/types'
 import { isInCommunitySupportThread, isThreadStarterMessage } from '@/utils'
-import { EmbedBuilder, ThreadChannel } from 'discord.js'
-import { error } from '@/logging/logger'
 
 const logsLinkPattern = /https?:\/\/mclo\.gs\/([a-zA-Z0-9]+)/
 
