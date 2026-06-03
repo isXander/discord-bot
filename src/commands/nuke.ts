@@ -1,0 +1,89 @@
+import process from 'node:process'
+
+import { ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js'
+import { eq } from 'drizzle-orm'
+
+import { PERMISSION_ERROR_TEXT } from '@/data'
+import { db } from '@/db'
+import { applications } from '@/db/schema'
+import { ChatInputCommand } from '@/types'
+import { info } from '@/logging/logger'
+
+import { validate as uuidValidate } from 'uuid'
+
+export const nukeCommand: ChatInputCommand = {
+	data: new SlashCommandBuilder()
+		.setName('nuke')
+		.setDescription('Delete an application entry from the database')
+		.setDefaultMemberPermissions(PermissionFlagsBits.BanMembers)
+		.addStringOption((option) =>
+			option.setName('id').setDescription('Application ID').setRequired(true),
+		) as SlashCommandBuilder,
+	meta: {
+		name: 'nuke',
+		description: 'Delete an application entry from the database',
+		category: 'moderation',
+		cooldownSeconds: 3,
+	},
+	async execute(interaction: ChatInputCommandInteraction) {
+		const LEAD_MODERATOR_IDS = [
+			'484315780385865728',
+			'1054541801417093181',
+			'285544381551869965',
+			'175371646515937281',
+			'992015816818176041',
+		]
+
+		if (!interaction.guild) return
+
+		const invoker = await interaction.guild.members.fetch(interaction.user.id)
+
+		const applicationId = interaction.options.getString('id', true)
+
+		if (
+			!invoker.roles.cache.has(process.env.DISCORD_MODERATOR_ROLE_ID!) ||
+			!LEAD_MODERATOR_IDS.includes(invoker.user.id)
+		) {
+			await interaction.reply({
+				content: PERMISSION_ERROR_TEXT,
+				flags: 'Ephemeral',
+			})
+			return
+		}
+
+		if (!uuidValidate(applicationId)) {
+			await interaction.reply({
+				content: "You've provided an invalid UUID.",
+				flags: 'Ephemeral',
+			})
+			return
+		}
+
+		const [linkedCase] = await db
+			.select()
+			.from(applications)
+			.where(eq(applications.applicationId, applicationId))
+
+		if (!linkedCase) {
+			await interaction.reply({
+				content: 'This application does not exist, have you typed it correctly?',
+				flags: 'Ephemeral',
+			})
+			return
+		}
+
+		const [deleted] = await db
+			.delete(applications)
+			.where(eq(applications.applicationId, applicationId))
+			.returning()
+
+		await interaction.reply({
+			content: `Successfully deleted application ${deleted.applicationId} sent by <@${deleted.userId}>.`,
+			flags: 'Ephemeral',
+		})
+
+		info(
+			`:boom: Trusted user application (ID: ${deleted.applicationId}) entry has been deleted by a moderator (\`${interaction.user.username}\`, ID: ${interaction.user.id}) from the database.`,
+		)
+	},
+}

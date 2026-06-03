@@ -15,6 +15,8 @@ import { info } from '@/logging/logger'
 import { ChatInputCommand } from '@/types'
 import { createDefaultEmbed } from '@/utils'
 
+import { validate as uuidValidate } from 'uuid'
+
 export const rejectCommand: ChatInputCommand = {
 	data: new SlashCommandBuilder()
 		.setName('reject')
@@ -52,10 +54,18 @@ export const rejectCommand: ChatInputCommand = {
 			return
 		}
 
+		if (!uuidValidate(applicationId)) {
+			await interaction.reply({
+				content: "You've provided an invalid UUID.",
+				flags: 'Ephemeral',
+			})
+			return
+		}
+
 		const [linkedCase] = await db
 			.select()
 			.from(applications)
-			.where(eq(applications.applicationId, applicationId!))
+			.where(eq(applications.applicationId, applicationId))
 
 		if (!linkedCase) {
 			await interaction.reply({
@@ -101,7 +111,7 @@ export const rejectCommand: ChatInputCommand = {
 				rejectionReason: rejectionReason,
 				cooldownUntil: cooldown,
 			})
-			.where(eq(applications.applicationId, applicationId!))
+			.where(eq(applications.applicationId, applicationId))
 			.returning()
 
 		const applicationsChannel = await interaction.guild.channels.fetch(

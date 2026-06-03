@@ -15,6 +15,7 @@ import { pingCommand } from './ping'
 import { solvedCommand } from './solved'
 import { verifyCommand } from './verify'
 import { watchlistCommand } from './watchlist'
+import { nukeCommand } from './nuke'
 
 export const commands: AnyCommand[] = [
 	docsCommand,
@@ -32,6 +33,7 @@ export const commands: AnyCommand[] = [
 	approveCommand,
 	rejectCommand,
 	watchlistCommand,
+	nukeCommand,
 ]
 
 export default commands

@@ -13,6 +13,8 @@ import { db } from '@/db'
 import { applications } from '@/db/schema'
 import { ChatInputCommand } from '@/types'
 
+import { validate as uuidValidate } from 'uuid'
+
 export const assignCommand: ChatInputCommand = {
 	data: new SlashCommandBuilder()
 		.setName('assign')
@@ -61,6 +63,14 @@ export const assignCommand: ChatInputCommand = {
 		) {
 			await interaction.reply({
 				content: "You've attempted to assign a user that's not a moderator member.",
+				flags: 'Ephemeral',
+			})
+			return
+		}
+
+		if (!uuidValidate(applicationId)) {
+			await interaction.reply({
+				content: "You've provided an invalid UUID.",
 				flags: 'Ephemeral',
 			})
 			return
