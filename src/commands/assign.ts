@@ -22,7 +22,7 @@ export const assignCommand: ChatInputCommand = {
 			option.setName('id').setDescription('Application ID').setRequired(true),
 		)
 		.addUserOption((option) =>
-			option.setName('moderator').setDescription('Discord Moderator').setRequired(true),
+			option.setName('moderator').setDescription('Discord Moderator').setRequired(false),
 		) as SlashCommandBuilder,
 	meta: {
 		name: 'assign',
@@ -33,10 +33,10 @@ export const assignCommand: ChatInputCommand = {
 	async execute(interaction: ChatInputCommandInteraction) {
 		if (!interaction.guild) return
 
-		const applicationId = interaction.options.getString('id', true)
-		const discordModerator = interaction.options.getUser('moderator', true)
-
 		const invoker = await interaction.guild.members.fetch(interaction.user.id)
+
+		const applicationId = interaction.options.getString('id', true)
+		const discordModerator = interaction.options.getUser('moderator', false) ?? invoker.user
 
 		if (!invoker.roles.cache.has(process.env.DISCORD_MODERATOR_ROLE_ID!)) {
 			await interaction.reply({
