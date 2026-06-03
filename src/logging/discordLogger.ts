@@ -1,6 +1,5 @@
 // src/logging/discordLogger.ts
-import { Client, TextBasedChannel, ThreadChannel } from 'discord.js'
-
+import { Client, ThreadChannel } from 'discord.js'
 import { Logger } from './logger'
 
 export async function createDiscordLogger(client: Client, channelId: string): Promise<Logger> {
@@ -14,11 +13,25 @@ export async function createDiscordLogger(client: Client, channelId: string): Pr
 
 	return {
 		info(msg: string) {
-			logChannel.send(msg).catch(() => null)
+			logChannel
+				.send({
+					content: msg,
+					allowedMentions: {
+						parse: [],
+					},
+				})
+				.catch(() => null)
 		},
 
 		warn(msg: string) {
-			logChannel.send(msg).catch(() => null)
+			logChannel
+				.send({
+					content: msg,
+					allowedMentions: {
+						parse: [],
+					},
+				})
+				.catch(() => null)
 		},
 
 		error(msg: string | Error) {

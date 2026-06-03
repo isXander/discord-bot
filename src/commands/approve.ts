@@ -120,20 +120,22 @@ export const approveCommand: ChatInputCommand = {
 
 		await approvedUser.roles.add(process.env.TRUSTED_ROLE_ID!)
 
-		await approvedUser.send({
-			embeds: [
-				createDefaultEmbed({
-					title: 'Trusted Role Application - Approved',
-					description: [
-						'Your application has been approved, thank you for being an active community member!',
-						' ',
-						'You are now permitted to upload images and share links in our community.',
-						' ',
-						'Please use this privilege responsibly, abuse will result in permanent role removal.',
-					].join('\n'),
-				}),
-			],
-		})
+		try {
+			await approvedUser.send({
+				embeds: [
+					createDefaultEmbed({
+						title: 'Trusted Role Application - Approved',
+						description: [
+							'Your application has been approved, thank you for being an active community member!',
+							' ',
+							'You are now permitted to upload images and share links in our community.',
+							' ',
+							'Please use this privilege responsibly, abuse will result in permanent role removal.',
+						].join('\n'),
+					}),
+				],
+			})
+		} catch {}
 
 		await interaction.reply({
 			content: [

@@ -137,18 +137,22 @@ export const rejectCommand: ChatInputCommand = {
 
 		const rejectedUser = await interaction.guild.members.fetch(updated.userId)
 
-		await rejectedUser.send({
-			embeds: [
-				createDefaultEmbed({
-					title: 'Trusted Role Application - Rejected',
-					description: [
-						'Your application has been rejected, please try again later.',
-						' ',
-						hideRejectionReason ? '*Moderators have decided to hide the reason.*' : rejectionReason,
-					].join('\n'),
-				}).setColor(0xff496e),
-			],
-		})
+		try {
+			await rejectedUser.send({
+				embeds: [
+					createDefaultEmbed({
+						title: 'Trusted Role Application - Rejected',
+						description: [
+							'Your application has been rejected, please try again later.',
+							' ',
+							hideRejectionReason
+								? '*Moderators have decided to hide the reason.*'
+								: rejectionReason,
+						].join('\n'),
+					}).setColor(0xff496e),
+				],
+			})
+		} catch {}
 
 		await interaction.reply({
 			content: [

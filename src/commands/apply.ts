@@ -26,15 +26,14 @@ export const applyCommand: ChatInputCommand = {
 		cooldownSeconds: 10,
 	},
 	async execute(interaction: ChatInputCommandInteraction) {
-		if (!interaction.guild || !interaction.member) return
+		if (!interaction.guild || !interaction.member || !interaction.inCachedGuild()) return
 
-		if (
-			(interaction.member.roles as GuildMemberRoleManager).cache.has(process.env.TRUSTED_ROLE_ID!)
-		) {
+		if (interaction.member.roles.cache.has(process.env.TRUSTED_ROLE_ID!)) {
 			await interaction.reply({
 				content: "You're already an approved trusted user.",
 				flags: 'Ephemeral',
 			})
+			return
 		} else {
 			const user = await db
 				.select({
@@ -70,6 +69,12 @@ export const applyCommand: ChatInputCommand = {
 						}).setColor(0xff496e),
 					],
 				})
+				await interaction.reply({
+					content:
+						'Check your direct messages, please ensure your DMs from Modrinth are allowed to receive important messages.',
+					flags: 'Ephemeral',
+				})
+				return
 			} else {
 				const pending = await db
 					.select()
