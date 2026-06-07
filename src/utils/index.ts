@@ -1,6 +1,7 @@
 export * from './commands'
 export * from './embeds'
 export * from './files'
+export * from './modrinth-roles'
 export * from './text'
 export * from './threads'
 export * from './users'

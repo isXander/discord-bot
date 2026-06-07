@@ -8,10 +8,10 @@ import { startServerPauseDMs } from '@/cron/pauseDMs'
 import { startThreadStaleCheckCron } from '@/cron/threadStaleCheck'
 import listeners from '@/listeners'
 import reactionListeners from '@/listeners/reaction'
-import { createCommandRegistry, deployCommands, tryJoinThread } from '@/utils'
+import { createCommandRegistry, deployCommands, syncModrinthRoles, tryJoinThread } from '@/utils'
 
 import { db } from './db'
-import { watchlist } from './db/schema'
+import { users, watchlist } from './db/schema'
 import { createDiscordLogger } from './logging/discordLogger'
 import { setLogger } from './logging/logger'
 import { createMessageHandlers, createReactionHandlers } from './types/listeners'
@@ -126,6 +126,14 @@ client.on(Events.GuildMemberAdd, async (member) => {
 		if (modChannel && modChannel.isTextBased()) {
 			await (modChannel as TextChannel).send(watchlistUser[0].alertText)
 		}
+	}
+
+	const [linkedUser] = await db.select().from(users).where(eq(users.id, member.id)).limit(1)
+
+	if (linkedUser?.modrinthUserId) {
+		await syncModrinthRoles(member, linkedUser.modrinthUserId).catch((err) => {
+			console.error('[Modrinth][Roles][ERROR] Failed to sync roles on join', err)
+		})
 	}
 })
 

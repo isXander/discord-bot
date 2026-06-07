@@ -19,8 +19,8 @@ export const verifyCommand: ChatInputCommand = {
 	},
 	execute: async (interaction) => {
 		const sub = interaction.options.getSubcommand()
-		const base = process.env.PUBLIC_BASE_URL || 'http://localhost:3000'
 		if (sub === 'crowdin') {
+			const base = process.env.PUBLIC_BASE_URL || 'http://localhost:3000'
 			const token = await createVerificationState(interaction.user.id)
 			const url = `${base}/crowdin/verify?token=${encodeURIComponent(token)}`
 
@@ -48,22 +48,16 @@ export const verifyCommand: ChatInputCommand = {
 			return
 		}
 		if (sub === 'modrinth') {
-			const token = await createVerificationState(interaction.user.id)
-			const url = `${base}/modrinth/verify?token=${encodeURIComponent(token)}`
-			const expireAt = Math.floor(Date.now() / 1000) + 15 * 60 // now + 15 minutes
+			const url = process.env.MODRINTH_COMMUNITY_LINK_URL || 'https://modrinth.com/discord/link'
 
 			const embed = new EmbedBuilder()
 				.setColor(0x1bd96a)
 				.setTitle('Link your Modrinth account')
 				.setDescription(
 					[
-						'We need to verify your Modrinth account to link it with your Discord.',
-						' ',
-						'To continue, please click the link down below.',
+						'Connect Discord through Modrinth to link your account and claim eligible roles.',
 						' ',
 						`**[[ Click here to continue → ]](${url})**`,
-						' ',
-						`-# This link will expire <t:${expireAt}:R>`,
 					].join('\n'),
 				)
 
