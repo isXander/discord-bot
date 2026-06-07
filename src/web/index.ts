@@ -4,7 +4,7 @@ import type { Client } from 'discord.js'
 import { and, eq, gt, sql } from 'drizzle-orm'
 import express, { NextFunction, Request, Response } from 'express'
 
-import { CrowdinOauthHelper, ModrinthOauthHelper } from '@/api/'
+import { CrowdinOauthHelper, ModrinthApi, ModrinthOauthHelper } from '@/api/'
 import { db } from '@/db'
 import { crowdinAccounts, oauthVerifications, users } from '@/db/schema'
 import { createDefaultEmbed } from '@/utils/embeds'
@@ -17,6 +17,8 @@ const GUILD_ID = process.env.GUILD_ID!
 const TRANSLATOR_ROLE_ID = process.env.TRANSLATOR_ROLE_ID || process.env.ACTIVE_ROLE_ID!
 const CROWDIN_SCOPES = 'project'
 const PRIDE_ROLE_ID = process.env.PRIDE_ROLE_ID || ''
+const CREATOR_ROLE_ID = process.env.CREATOR_ROLE_ID || ''
+const BIG_CREATOR_ROLE_ID = process.env.BIG_CREATOR_ROLE_ID || ''
 const PROOFREADER_ROLE_ID = process.env.PROOFREADER_ROLE_ID || ''
 
 const inflightStates = new Map<string, number>()
@@ -95,6 +97,8 @@ export function startWebServer(client: Client) {
 				.onConflictDoUpdate({ target: users.id, set: { modrinthUserId: String(user.id) } })
 
 			const hasPrideBadge = user.campaigns?.pride_26?.has_badge === true
+			const projects = await ModrinthApi.getUserProjects(user.id)
+			const totalDownloads = projects.reduce((acc, project) => acc + (project.downloads ?? 0), 0)
 
 			if (!client.isReady()) {
 				await new Promise<void>((resolve) => client.once('ready', () => resolve()))
@@ -102,34 +106,67 @@ export function startWebServer(client: Client) {
 			const guild = await client.guilds.fetch(GUILD_ID)
 			const member = await guild.members.fetch(stateRow.discordUserId).catch(() => null)
 			if (member) {
-				let prideGranted = false
+				const grantedRoles: string[] = []
 				const alreadyHasPrideRole = PRIDE_ROLE_ID ? member.roles.cache.has(PRIDE_ROLE_ID) : false
+				const alreadyHasCreatorRole = CREATOR_ROLE_ID
+					? member.roles.cache.has(CREATOR_ROLE_ID)
+					: false
+				const alreadyHasBigCreatorRole = BIG_CREATOR_ROLE_ID
+					? member.roles.cache.has(BIG_CREATOR_ROLE_ID)
+					: false
 				console.debug('[Modrinth][Verify]', {
 					userId: String(user.id),
 					discordUserId: stateRow.discordUserId,
 					hasPrideBadge,
+					totalDownloads,
 					prideRoleConfigured: Boolean(PRIDE_ROLE_ID),
+					creatorRoleConfigured: Boolean(CREATOR_ROLE_ID),
+					bigCreatorRoleConfigured: Boolean(BIG_CREATOR_ROLE_ID),
 					alreadyHasPrideRole,
+					alreadyHasCreatorRole,
+					alreadyHasBigCreatorRole,
 				})
 
 				if (hasPrideBadge && PRIDE_ROLE_ID && !alreadyHasPrideRole) {
 					try {
 						await member.roles.add(PRIDE_ROLE_ID)
-						prideGranted = true
+						grantedRoles.push('Pride')
 					} catch (err) {
 						console.error('[Discord][ERROR] Failed to grant pride role', err)
 					}
 				} else if (hasPrideBadge && !PRIDE_ROLE_ID) {
 					console.warn('[Discord] PRIDE_ROLE_ID is not configured; cannot grant pride role')
 				}
-				try {
-					let description = 'Your Modrinth account has been linked.'
-					if (prideGranted) {
-						description = 'Thanks for supporting Pride 2026! We granted you the Pride role.'
-					} else if (hasPrideBadge && alreadyHasPrideRole) {
-						description = 'Thanks for supporting Pride 2026! You already have the Pride role.'
-					}
 
+				if (totalDownloads >= 20_000 && CREATOR_ROLE_ID && !alreadyHasCreatorRole) {
+					try {
+						await member.roles.add(CREATOR_ROLE_ID)
+						grantedRoles.push('Creator')
+					} catch (err) {
+						console.error('[Discord][ERROR] Failed to grant creator role', err)
+					}
+				} else if (totalDownloads >= 20_000 && !CREATOR_ROLE_ID) {
+					console.warn('[Discord] CREATOR_ROLE_ID is not configured; cannot grant creator role')
+				}
+
+				if (totalDownloads > 1_000_000 && BIG_CREATOR_ROLE_ID && !alreadyHasBigCreatorRole) {
+					try {
+						await member.roles.add(BIG_CREATOR_ROLE_ID)
+						grantedRoles.push('Big Creator')
+					} catch (err) {
+						console.error('[Discord][ERROR] Failed to grant big creator role', err)
+					}
+				} else if (totalDownloads > 1_000_000 && !BIG_CREATOR_ROLE_ID) {
+					console.warn(
+						'[Discord] BIG_CREATOR_ROLE_ID is not configured; cannot grant big creator role',
+					)
+				}
+
+				try {
+					const description =
+						grantedRoles.length > 0
+							? `You have been granted the following roles:\n${grantedRoles.map((role) => `- ${role}`).join('\n')}`
+							: 'Your Modrinth account has been linked.'
 					const embed = createDefaultEmbed()
 						.setTitle('Modrinth account linked')
 						.setDescription(description)

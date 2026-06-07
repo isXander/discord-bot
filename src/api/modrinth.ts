@@ -75,4 +75,8 @@ export class ModrinthApi {
 	static async getProject(id: string): Promise<ModrinthProject> {
 		return this.request<ModrinthProject>(`/project/${id}`)
 	}
+
+	static async getUserProjects(idOrUsername: string): Promise<ModrinthProject[]> {
+		return this.request<ModrinthProject[]>(`/user/${encodeURIComponent(idOrUsername)}/projects`)
+	}
 }
