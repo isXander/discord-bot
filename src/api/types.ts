@@ -14,6 +14,10 @@ export interface ModrinthProject {
 	downloads?: number
 }
 
+export interface ModrinthAllProjectsResponse {
+	projects: ModrinthProject[]
+}
+
 export interface ModrinthUser {
 	id: string
 	username: string
