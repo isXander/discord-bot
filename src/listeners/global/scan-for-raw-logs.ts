@@ -1,6 +1,6 @@
 import { DONT_UPLOAD_RAW_LOGS } from '@/data/misc'
 import { CreateListener } from '@/types'
-import { toHumanFileSize } from '@/utils'
+import { isInCommunitySupportThread } from '@/utils'
 import content from '*?raw'
 
 function isMinecraftLogFile(filename: string): boolean {
@@ -17,17 +17,15 @@ function isMinecraftLogFile(filename: string): boolean {
 }
 
 export const scanForRawLogs: CreateListener = {
-	id: 'global:scan-for-raw-logs',
+	id: 'forum:community-support:scan-for-raw-logs',
 	event: 'create',
-	description: 'Scans message attachments for raw logs',
+	description: 'Scans community support message attachments for raw logs',
 	priority: 0,
 	filter: { allowBots: false, allowDMs: false },
-	match: async () => true,
+	match: async (ctx) =>
+		isInCommunitySupportThread(ctx.message) &&
+		ctx.message.attachments.some((attachment) => isMinecraftLogFile(attachment.name)),
 	handle: async (ctx) => {
-		if (!ctx.message.guild) return
-		if (!ctx.message.author) return
-		if (!ctx.message.attachments) return
-
 		ctx.message.attachments.forEach((attachment) => {
 			if (attachment.name.length === 0) return
 			if (isMinecraftLogFile(attachment.name)) {

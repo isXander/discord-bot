@@ -21,6 +21,12 @@ const PROOFREADER_ROLE_ID = process.env.PROOFREADER_ROLE_ID || ''
 
 const inflightStates = new Map<string, number>()
 
+function buildModrinthCommunityCallbackUrl() {
+  const url = new URL(process.env.MODRINTH_COMMUNITY_LINK_URL || 'https://modrinth.com/discord/link')
+  url.searchParams.set('callback', 'linked')
+  return url.toString()
+}
+
 type ModrinthHandoffPayload = {
   v: 1
   modrinth_user_id: string
@@ -111,11 +117,11 @@ export function startWebServer(client: Client) {
     const member = await guild.members.fetch(verified.discord_user_id).catch(() => null)
 
     if (!member) {
-      return res.redirect(process.env.DISCORD_INVITE_URL || 'https://discord.gg/modrinth')
+      return res.redirect(process.env.DISCORD_INVITE_URL || 'https://discord.modrinth.com')
     }
 
     await syncModrinthRoles(member, verified.modrinth_user_id)
-    res.status(200).setHeader('Content-Type', 'text/html; charset=utf-8').send(htmlClosePage)
+    res.redirect(buildModrinthCommunityCallbackUrl())
   })
 
   app.get('/crowdin/verify', async (req: Request, res: Response) => {
