@@ -1,12 +1,14 @@
 import process from 'node:process'
 
 import {
+	ApplicationCommandType,
 	ChatInputCommandInteraction,
 	EmbedBuilder,
 	PermissionFlagsBits,
 	SlashCommandBuilder,
 } from 'discord.js'
 import { eq } from 'drizzle-orm'
+import { validate as uuidValidate } from 'uuid'
 
 import { PERMISSION_ERROR_TEXT } from '@/data'
 import { db } from '@/db'
@@ -15,9 +17,8 @@ import { info } from '@/logging/logger'
 import { ChatInputCommand } from '@/types'
 import { createDefaultEmbed } from '@/utils'
 
-import { validate as uuidValidate } from 'uuid'
-
 export const approveCommand: ChatInputCommand = {
+	type: ApplicationCommandType.ChatInput,
 	data: new SlashCommandBuilder()
 		.setName('approve')
 		.setDescription('Approve application')
@@ -145,7 +146,9 @@ export const approveCommand: ChatInputCommand = {
 					}),
 				],
 			})
-		} catch {}
+		} catch {
+			// The role update is the source of truth; DMs can fail if the user blocks the bot.
+		}
 
 		await interaction.reply({
 			content: [

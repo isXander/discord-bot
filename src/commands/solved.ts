@@ -1,9 +1,10 @@
-import { SlashCommandBuilder, Snowflake } from 'discord.js'
+import { ApplicationCommandType, SlashCommandBuilder, Snowflake } from 'discord.js'
 
 import { FORUM_ONLY_ERROR_TEXT, OP_MARKED_SOLVED_TEXT, OP_ONLY_ERROR_TEXT } from '@/data'
 import type { ChatInputCommand } from '@/types/commands'
 
 export const solvedCommand: ChatInputCommand = {
+	type: ApplicationCommandType.ChatInput,
 	data: new SlashCommandBuilder().setName('solved').setDescription('Mark your thread as solved'),
 	meta: {
 		name: 'solved',

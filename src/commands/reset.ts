@@ -1,6 +1,11 @@
 import * as process from 'node:process'
 
-import { ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js'
+import {
+	ApplicationCommandType,
+	ChatInputCommandInteraction,
+	PermissionFlagsBits,
+	SlashCommandBuilder,
+} from 'discord.js'
 import { eq } from 'drizzle-orm'
 
 import { PERMISSION_ERROR_TEXT } from '@/data'
@@ -10,6 +15,7 @@ import { info } from '@/logging/logger'
 import { ChatInputCommand } from '@/types'
 
 export const resetCommand: ChatInputCommand = {
+	type: ApplicationCommandType.ChatInput,
 	data: new SlashCommandBuilder()
 		.setName('reset')
 		.setDescription("Remove user's trusted role with option to reset their message counter")

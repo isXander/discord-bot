@@ -1,21 +1,22 @@
 import process from 'node:process'
 
 import {
+	ApplicationCommandType,
 	ChatInputCommandInteraction,
 	EmbedBuilder,
 	PermissionFlagsBits,
 	SlashCommandBuilder,
 } from 'discord.js'
 import { eq } from 'drizzle-orm'
+import { validate as uuidValidate } from 'uuid'
 
 import { PERMISSION_ERROR_TEXT } from '@/data'
 import { db } from '@/db'
 import { applications } from '@/db/schema'
 import { ChatInputCommand } from '@/types'
 
-import { validate as uuidValidate } from 'uuid'
-
 export const assignCommand: ChatInputCommand = {
+	type: ApplicationCommandType.ChatInput,
 	data: new SlashCommandBuilder()
 		.setName('assign')
 		.setDescription('Assign case to a moderator')

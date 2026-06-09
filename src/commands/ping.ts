@@ -1,8 +1,9 @@
-import { SlashCommandBuilder } from 'discord.js'
+import { ApplicationCommandType, SlashCommandBuilder } from 'discord.js'
 
 import type { ChatInputCommand } from '@/types/commands'
 
 export const pingCommand: ChatInputCommand = {
+	type: ApplicationCommandType.ChatInput,
 	data: new SlashCommandBuilder().setName('ping').setDescription('Replies with Pong!'),
 	meta: {
 		name: 'ping',

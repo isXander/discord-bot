@@ -1,8 +1,9 @@
-import { SlashCommandBuilder } from 'discord.js'
+import { ApplicationCommandType, SlashCommandBuilder } from 'discord.js'
 
 import type { ChatInputCommand } from '@/types/commands'
 
 export const docsCommand: ChatInputCommand = {
+	type: ApplicationCommandType.ChatInput,
 	data: new SlashCommandBuilder()
 		.setName('docs')
 		.setDescription('Send a link to a documentation page')

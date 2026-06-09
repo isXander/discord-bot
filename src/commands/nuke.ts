@@ -1,17 +1,22 @@
 import process from 'node:process'
 
-import { ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js'
+import {
+	ApplicationCommandType,
+	ChatInputCommandInteraction,
+	PermissionFlagsBits,
+	SlashCommandBuilder,
+} from 'discord.js'
 import { eq } from 'drizzle-orm'
+import { validate as uuidValidate } from 'uuid'
 
 import { PERMISSION_ERROR_TEXT } from '@/data'
 import { db } from '@/db'
 import { applications } from '@/db/schema'
-import { ChatInputCommand } from '@/types'
 import { info } from '@/logging/logger'
-
-import { validate as uuidValidate } from 'uuid'
+import { ChatInputCommand } from '@/types'
 
 export const nukeCommand: ChatInputCommand = {
+	type: ApplicationCommandType.ChatInput,
 	data: new SlashCommandBuilder()
 		.setName('nuke')
 		.setDescription('Delete an application entry from the database')

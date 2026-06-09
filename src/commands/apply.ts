@@ -1,9 +1,9 @@
 import process from 'node:process'
 
 import {
+	ApplicationCommandType,
 	ChatInputCommandInteraction,
 	EmbedBuilder,
-	GuildMemberRoleManager,
 	SlashCommandBuilder,
 	TextChannel,
 } from 'discord.js'
@@ -16,6 +16,7 @@ import { ChatInputCommand } from '@/types'
 import { createDefaultEmbed } from '@/utils'
 
 export const applyCommand: ChatInputCommand = {
+	type: ApplicationCommandType.ChatInput,
 	data: new SlashCommandBuilder()
 		.setName('apply')
 		.setDescription('Apply for a Advanced Trusted Programme'),

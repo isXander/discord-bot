@@ -1,27 +1,51 @@
 import {
+	ApplicationCommandType,
+	type ChatInputCommandInteraction,
 	Collection,
 	Interaction,
+	type MessageContextMenuCommandInteraction,
 	PermissionsBitField,
 	REST,
 	Routes,
-	SlashCommandBuilder,
 } from 'discord.js'
 
 import commands from '../commands/'
 import type {
 	AnyCommand,
+	ChatInputCommand,
 	CommandHandlerOptions,
 	CommandHandlers,
 	CommandMap,
+	MessageContextMenuCommand,
 } from '../types/commands'
 
-type CooldownKey = string // `${userId}:${commandName}`
+type CommandType = ApplicationCommandType.ChatInput | ApplicationCommandType.Message
+type CooldownKey = string // `${userId}:${commandType}:${commandName}`
+type CommandInteraction = ChatInputCommandInteraction | MessageContextMenuCommandInteraction
+
+function getCommandType(cmd: AnyCommand): CommandType {
+	return cmd.type
+}
+
+function getCommandKey(type: CommandType, name: string) {
+	return `${type}:${name}`
+}
+
+function isChatInputCommand(cmd: AnyCommand): cmd is ChatInputCommand {
+	return getCommandType(cmd) === ApplicationCommandType.ChatInput
+}
+
+function isMessageContextMenuCommand(cmd: AnyCommand): cmd is MessageContextMenuCommand {
+	return getCommandType(cmd) === ApplicationCommandType.Message
+}
 
 export function createCommandRegistry(
 	commands: AnyCommand[],
 	opts: CommandHandlerOptions = {},
 ): CommandHandlers {
-	const map: CommandMap = new Map(commands.map((c) => [c.meta.name, c]))
+	const map: CommandMap = new Map(
+		commands.map((c) => [getCommandKey(getCommandType(c), c.meta.name), c]),
+	)
 	const cooldowns = new Collection<CooldownKey, number>()
 	const defaultCooldown = opts.defaultCooldownSeconds ?? 3
 
@@ -40,8 +64,8 @@ export function createCommandRegistry(
 		return true
 	}
 
-	function checkCooldown(userId: string, name: string, seconds: number) {
-		const key = `${userId}:${name}`
+	function checkCooldown(userId: string, cmd: AnyCommand, seconds: number) {
+		const key = `${userId}:${getCommandType(cmd)}:${cmd.meta.name}`
 		const now = Date.now()
 		const until = cooldowns.get(key)
 		if (until && until > now) {
@@ -51,12 +75,11 @@ export function createCommandRegistry(
 		return 0
 	}
 
-	async function onInteractionCreate(interaction: Interaction) {
-		if (!interaction.isChatInputCommand()) return
-
-		const cmd = map.get(interaction.commandName)
-		if (!cmd) return
-
+	async function runCommand(
+		interaction: CommandInteraction,
+		cmd: AnyCommand,
+		execute: () => Promise<void> | void,
+	) {
 		// Context checks
 		if (cmd.meta.dmOnly && interaction.inGuild()) return
 		if (cmd.meta.guildOnly && !interaction.inGuild()) return
@@ -66,11 +89,15 @@ export function createCommandRegistry(
 		// Cooldown
 		const cd = cmd.meta.cooldownSeconds ?? defaultCooldown
 		if (cd > 0) {
-			const remain = checkCooldown(interaction.user.id, cmd.meta.name, cd)
+			const remain = checkCooldown(interaction.user.id, cmd, cd)
 			if (remain > 0) {
 				if (interaction.deferred || interaction.replied) return
+				const commandName =
+					getCommandType(cmd) === ApplicationCommandType.ChatInput
+						? `/${cmd.meta.name}`
+						: `"${cmd.meta.name}"`
 				await interaction.reply({
-					content: `Please wait ${remain}s before using /${cmd.meta.name} again.`,
+					content: `Please wait ${remain}s before using ${commandName} again.`,
 					flags: 'Ephemeral',
 				})
 				return
@@ -78,7 +105,7 @@ export function createCommandRegistry(
 		}
 
 		try {
-			await Promise.resolve(cmd.execute(interaction))
+			await Promise.resolve(execute())
 		} catch (err) {
 			if (opts.debug) console.error(`[command:${cmd.meta.name}]`, err)
 			const content = 'There was an error while executing this command.'
@@ -90,23 +117,37 @@ export function createCommandRegistry(
 		}
 	}
 
-	function getAllSlashCommandData() {
+	async function onInteractionCreate(interaction: Interaction) {
+		if (interaction.isChatInputCommand()) {
+			const cmd = map.get(getCommandKey(ApplicationCommandType.ChatInput, interaction.commandName))
+			if (!cmd || !isChatInputCommand(cmd)) return
+			await runCommand(interaction, cmd, () => cmd.execute(interaction))
+			return
+		}
+
+		if (interaction.isMessageContextMenuCommand()) {
+			const cmd = map.get(getCommandKey(ApplicationCommandType.Message, interaction.commandName))
+			if (!cmd || !isMessageContextMenuCommand(cmd)) return
+			await runCommand(interaction, cmd, () => cmd.execute(interaction))
+		}
+	}
+
+	function getAllApplicationCommandData() {
 		return Array.from(map.values()).map((c) => {
-			const builder = c.data as SlashCommandBuilder
 			if (c.meta.defaultMemberPermissions !== undefined) {
 				const bits = new PermissionsBitField(c.meta.defaultMemberPermissions as any).bitfield
-				builder.setDefaultMemberPermissions(bits)
+				c.data.setDefaultMemberPermissions(bits)
 			}
 			if (c.meta.dmPermission !== undefined) {
-				builder.setDMPermission(c.meta.dmPermission)
+				c.data.setDMPermission(c.meta.dmPermission)
 			}
-			return builder.toJSON()
+			return c.data.toJSON()
 		})
 	}
 
 	return {
 		onInteractionCreate,
-		getAllSlashCommandData,
+		getAllApplicationCommandData,
 	}
 }
 
@@ -121,7 +162,7 @@ export async function deployCommands() {
 	}
 
 	const registry = createCommandRegistry(commands)
-	const body = registry.getAllSlashCommandData()
+	const body = registry.getAllApplicationCommandData()
 
 	const rest = new REST().setToken(token)
 

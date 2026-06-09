@@ -1,9 +1,12 @@
 import type {
 	AutocompleteInteraction,
 	ChatInputCommandInteraction,
+	ContextMenuCommandBuilder,
+	MessageContextMenuCommandInteraction,
 	PermissionResolvable,
 	SlashCommandBuilder,
 } from 'discord.js'
+import { ApplicationCommandType } from 'discord.js'
 
 export type CommandCategory = 'general' | 'moderation' | 'utility' | 'fun' | 'admin'
 
@@ -27,15 +30,38 @@ export interface CommandMeta {
 	dmPermission?: boolean
 }
 
-export interface ChatInputCommand {
-	// Slash command builder (or compatible object that has toJSON)
-	data: SlashCommandBuilder & { toJSON(): any }
+type CommandDataBuilder = {
+	toJSON(): any
+	setDefaultMemberPermissions(permissions: any): any
+	setDMPermission(enabled: boolean): any
+}
+
+interface BaseCommand<
+	TInteraction extends ChatInputCommandInteraction | MessageContextMenuCommandInteraction,
+	TData extends CommandDataBuilder,
+	TType extends ApplicationCommandType.ChatInput | ApplicationCommandType.Message,
+> {
+	type: TType
+	data: TData
 	meta: CommandMeta
-	execute: (interaction: ChatInputCommandInteraction) => Promise<void> | void
+	execute: (interaction: TInteraction) => Promise<void> | void
+}
+
+export type ChatInputCommand = BaseCommand<
+	ChatInputCommandInteraction,
+	SlashCommandBuilder & CommandDataBuilder,
+	ApplicationCommandType.ChatInput
+> & {
 	autocomplete?: (interaction: AutocompleteInteraction) => Promise<void> | void
 }
 
-export type AnyCommand = ChatInputCommand
+export type MessageContextMenuCommand = BaseCommand<
+	MessageContextMenuCommandInteraction,
+	ContextMenuCommandBuilder & CommandDataBuilder,
+	ApplicationCommandType.Message
+>
+
+export type AnyCommand = ChatInputCommand | MessageContextMenuCommand
 
 export type CommandMap = Map<string, AnyCommand>
 
@@ -49,5 +75,5 @@ export interface CommandHandlerOptions {
 
 export interface CommandHandlers {
 	onInteractionCreate: (interaction: any) => Promise<void>
-	getAllSlashCommandData: () => any[]
+	getAllApplicationCommandData: () => any[]
 }

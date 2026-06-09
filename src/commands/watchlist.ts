@@ -1,4 +1,9 @@
-import { ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js'
+import {
+	ApplicationCommandType,
+	ChatInputCommandInteraction,
+	PermissionFlagsBits,
+	SlashCommandBuilder,
+} from 'discord.js'
 import { eq } from 'drizzle-orm'
 
 import { PERMISSION_ERROR_TEXT } from '@/data'
@@ -8,6 +13,7 @@ import { info } from '@/logging/logger'
 import { ChatInputCommand } from '@/types'
 
 export const watchlistCommand: ChatInputCommand = {
+	type: ApplicationCommandType.ChatInput,
 	data: new SlashCommandBuilder()
 		.setName('watchlist')
 		.setDescription(

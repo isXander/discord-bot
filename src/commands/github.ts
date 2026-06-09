@@ -1,8 +1,9 @@
-import { SlashCommandBuilder } from 'discord.js'
+import { ApplicationCommandType, SlashCommandBuilder } from 'discord.js'
 
 import type { ChatInputCommand } from '@/types/commands'
 
 export const githubCommand: ChatInputCommand = {
+	type: ApplicationCommandType.ChatInput,
 	data: new SlashCommandBuilder()
 		.setName('github')
 		.setDescription("Query Modrinth's GitHub repositories")

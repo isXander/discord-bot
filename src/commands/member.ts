@@ -1,6 +1,11 @@
 import * as process from 'node:process'
 
-import { ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js'
+import {
+	ApplicationCommandType,
+	ChatInputCommandInteraction,
+	PermissionFlagsBits,
+	SlashCommandBuilder,
+} from 'discord.js'
 import { eq } from 'drizzle-orm'
 
 import { PERMISSION_ERROR_TEXT } from '@/data'
@@ -9,6 +14,7 @@ import { users } from '@/db/schema'
 import { ChatInputCommand } from '@/types'
 
 export const memberCommand: ChatInputCommand = {
+	type: ApplicationCommandType.ChatInput,
 	data: new SlashCommandBuilder()
 		.setName('member')
 		.setDescription('Get internal information about discord user')

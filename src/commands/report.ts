@@ -1,11 +1,12 @@
 import process from 'node:process'
 
-import { GuildMemberRoleManager, SlashCommandBuilder } from 'discord.js'
+import { ApplicationCommandType, GuildMemberRoleManager, SlashCommandBuilder } from 'discord.js'
 
 import { PERMISSION_ERROR_TEXT } from '@/data'
 import type { ChatInputCommand } from '@/types/commands'
 
 export const reportCommand: ChatInputCommand = {
+	type: ApplicationCommandType.ChatInput,
 	data: new SlashCommandBuilder()
 		.setName('report')
 		.setDescription('Report a community member')

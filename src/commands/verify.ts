@@ -1,9 +1,10 @@
-import { EmbedBuilder, SlashCommandBuilder } from 'discord.js'
+import { ApplicationCommandType, EmbedBuilder, SlashCommandBuilder } from 'discord.js'
 
 import type { ChatInputCommand } from '@/types/commands'
 import { createVerificationState } from '@/web'
 
 export const verifyCommand: ChatInputCommand = {
+	type: ApplicationCommandType.ChatInput,
 	data: new SlashCommandBuilder()
 		.setName('verify')
 		.setDescription('Link your external account to your Discord user')

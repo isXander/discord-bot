@@ -1,6 +1,7 @@
 import process from 'node:process'
 
 import {
+	ApplicationCommandType,
 	ChatInputCommandInteraction,
 	GuildMemberRoleManager,
 	PermissionFlagsBits,
@@ -13,6 +14,7 @@ import { ChatInputCommand } from '@/types'
 import { createDefaultEmbed } from '@/utils'
 
 export const pmCommand: ChatInputCommand = {
+	type: ApplicationCommandType.ChatInput,
 	data: new SlashCommandBuilder()
 		.setName('pm')
 		.setDescription('Send a private message')

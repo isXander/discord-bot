@@ -1,9 +1,15 @@
-import { ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from 'discord.js'
+import {
+	ApplicationCommandType,
+	ChatInputCommandInteraction,
+	EmbedBuilder,
+	SlashCommandBuilder,
+} from 'discord.js'
 
 import { ModrinthApi } from '@/api/modrinth'
 import { ChatInputCommand } from '@/types'
 
 export const projectCommand: ChatInputCommand = {
+	type: ApplicationCommandType.ChatInput,
 	data: new SlashCommandBuilder()
 		.setName('project')
 		.setDescription('Fetch a Modrinth project')
