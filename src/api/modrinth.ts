@@ -1,4 +1,4 @@
-import type { ModrinthProject, ModrinthUser } from '@/api/types'
+import type { ModrinthAllProjectsResponse, ModrinthProject, ModrinthUser } from '@/api/types'
 
 export class ModrinthApi {
 	private static baseUrl = (process.env.MODRINTH_API_BASE_URL || 'https://api.modrinth.com').replace(
@@ -32,5 +32,13 @@ export class ModrinthApi {
 			'v2',
 			`/user/${encodeURIComponent(idOrUsername)}/projects`,
 		)
+	}
+
+	static async getUserAllProjects(idOrUsername: string): Promise<ModrinthProject[]> {
+		const response = await this.request<ModrinthAllProjectsResponse>(
+			'v3',
+			`/user/${encodeURIComponent(idOrUsername)}/all-projects`,
+		)
+		return response.projects
 	}
 }

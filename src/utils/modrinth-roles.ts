@@ -12,7 +12,7 @@ const roleChecks = [
 export async function syncModrinthRoles(member: GuildMember, modrinthUserId: string) {
 	const [user, projects] = await Promise.all([
 		ModrinthApi.getUser(modrinthUserId),
-		ModrinthApi.getUserProjects(modrinthUserId),
+		ModrinthApi.getUserAllProjects(modrinthUserId),
 	])
 
 	const totalDownloads = projects.reduce((acc, project) => acc + (project.downloads ?? 0), 0)
@@ -27,6 +27,7 @@ export async function syncModrinthRoles(member: GuildMember, modrinthUserId: str
 		userId: modrinthUserId,
 		discordUserId: member.id,
 		hasPrideBadge: user.campaigns?.pride_26?.has_badge === true,
+		projectCount: projects.length,
 		totalDownloads,
 		configuredRoles: Object.fromEntries(
 			roleChecks.map(([name, envName]) => [name, Boolean(process.env[envName])]),
